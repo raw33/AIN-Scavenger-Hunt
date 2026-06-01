@@ -48,6 +48,8 @@
         <h2>Database</h2>
         <p class="muted">Use JSON export as the GitHub database. Replace <strong>ain-scavenger-db.json</strong> in the repo with the exported file when you want new defaults.</p>
         <div class="row"><button class="btn" onclick="downloadDb()">Export DB JSON</button><button class="btn secondary" onclick="downloadScoreCSV()">Export scores</button></div>
+        <div class="field"><label>Import team submissions</label><input id="importSubmissionsFile" type="file" accept="application/json,.json" multiple /></div>
+        <button class="btn secondary" onclick="importSubmissions()">Import submissions</button>
         <div class="field"><label>Import DB JSON</label><input id="importDbFile" type="file" accept="application/json,.json" /></div>
         <button class="btn secondary" onclick="importDb()">Import database</button>
         <div class="notice danger" style="margin-top:14px"><strong>Reset:</strong> clears local edits and submissions on this browser.</div>
@@ -133,6 +135,7 @@ function download(filename,text,type='application/json'){const blob=new Blob([te
 function downloadDb(){download('ain-scavenger-db.json',JSON.stringify(state.db,null,2))}
 function csvEscape(v){return '"'+String(v??'').replaceAll('"','""')+'"'}
 function downloadScoreCSV(){const rows=[['team','item','status','base','listedBonus','extraPersonBonus','submittedAt','participantNote','adminNote']];state.submissions.forEach(s=>rows.push([s.teamName,s.itemId,s.status,s.awardedBase||0,s.awardedBonus||0,s.extraPersonBonus||0,formatCentral(s.submittedAt),s.note,s.adminNote]));download('ain-scavenger-score-summary.csv',rows.map(r=>r.map(csvEscape).join(',')).join('\n'),'text/csv')}
+function importSubmissions(){const files=Array.from($('importSubmissionsFile').files||[]);if(!files.length){alert('Choose one or more team submission JSON files.');return}let pending=files.length,added=0,updated=0;files.forEach(file=>{const r=new FileReader();r.onload=e=>{try{const incoming=JSON.parse(e.target.result);const submissions=incoming.submissions||[];submissions.forEach(s=>{const i=state.submissions.findIndex(x=>x.id===s.id);if(i>=0){state.submissions[i]=Object.assign({},state.submissions[i],s);updated++}else{state.submissions.push(s);added++}})}catch(err){alert(`Could not import ${file.name}: ${err.message}`)}finally{pending--;if(!pending){save();alert(`Imported submissions. Added ${added}, updated ${updated}.`)}}};r.readAsText(file)})}
 function importDb(){const f=$('importDbFile').files[0];if(!f){alert('Choose a JSON file.');return}const r=new FileReader();r.onload=e=>{try{state.db=JSON.parse(e.target.result);state.db.teams.forEach(t=>{if(!state.teamReturnTimes[t.id])state.teamReturnTimes[t.id]=state.db.game.deadlineTime||'17:00'});save();alert('Database imported.')}catch(err){alert('Could not import database: '+err.message)}};r.readAsText(f)}
 function resetLocal(){if(confirm('Clear local teams, submissions, and scoring from this browser?')){localStorage.removeItem(KEY);location.reload()}}
 function renderAdmin(){if($('adminPanel').classList.contains('hidden'))return;renderTeamFilter();renderTeamEditor();renderQueue();renderScores()}
