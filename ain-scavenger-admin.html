@@ -67,7 +67,7 @@
 <script>
 const KEY='ainScavengerHunt2026V2';
 const DB_FILE='ain-scavenger-db.json';
-const BACKEND_URL=(window.AIN_BACKEND_URL||'').trim();
+const BACKEND_URL=(window.AIN_BACKEND_URL||'').trim().replace(/\/$/,'');
 const TZ='America/Chicago';
 const HUNT=[
   {id:1,title:'Malchow Plaza',points:5,answer:'Malchow Plaza sign',bonus:'Dakota Broadcasting shark in the window',bonusPoints:5},
@@ -96,16 +96,15 @@ function $(id){return document.getElementById(id)}
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function slug(s){return String(s||'team').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+Math.random().toString(36).slice(2,6)}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));renderAdmin()}
-function backendUrl(){return BACKEND_URL}
-function hasBackend(){return Boolean(backendUrl())}
+function apiUrl(path){return `${BACKEND_URL || location.origin}${path}`}
+function hasBackend(){return location.protocol !== 'file:'}
 function item(id){return HUNT.find(x=>x.id==id)}
 function teamById(id){return state.db.teams.find(t=>t.id===id)}
 function selectedTeamId(){return $('teamFilter')?.value||'all'}
 function submissionsForTeam(id){return id==='all'?state.submissions:state.submissions.filter(s=>s.teamId===id)}
 function formatCentral(iso){if(!iso)return '';return new Intl.DateTimeFormat('en-US',{timeZone:TZ,dateStyle:'short',timeStyle:'short'}).format(new Date(iso))+' CST/CDT'}
-async function postBackend(payload){if(!hasBackend())return false;await fetch(backendUrl(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});return true}
-function jsonp(url){return new Promise((resolve,reject)=>{const cb='ain_cb_'+Math.random().toString(36).slice(2);const script=document.createElement('script');window[cb]=data=>{delete window[cb];script.remove();resolve(data)};script.onerror=()=>{delete window[cb];script.remove();reject(new Error('Could not reach database.'))};const u=new URL(url);u.searchParams.set('callback',cb);script.src=u.toString();document.body.appendChild(script)})}
-async function syncSharedSubmissions(){if(!hasBackend()){alert('Shared database is not configured yet. Add your Apps Script URL to backend-config.js.');return}try{const u=new URL(backendUrl());u.searchParams.set('action','list');const data=await jsonp(u.toString());if(!data.ok)throw new Error(data.error||'Sync failed');const existing=new Map(state.submissions.map(s=>[s.id,s]));(data.submissions||[]).forEach(s=>existing.set(s.id,Object.assign({},existing.get(s.id)||{},s)));state.submissions=[...existing.values()];localStorage.setItem(KEY,JSON.stringify(state));renderAdmin();alert(`Synced ${data.submissions.length} submission(s).`)}catch(e){alert('Sync failed: '+e.message)}}
+async function postBackend(payload){if(!hasBackend())return false;const res=await fetch(apiUrl('/api/score'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!res.ok)throw new Error('Score update failed');return true}
+async function syncSharedSubmissions(){if(!hasBackend()){alert('Shared database is not available when opened as a file. Run the Node server or deploy it.');return}try{const res=await fetch(apiUrl('/api/submissions'));if(!res.ok)throw new Error('Sync failed');const data=await res.json();if(!data.ok)throw new Error(data.error||'Sync failed');const existing=new Map(state.submissions.map(s=>[s.id,s]));(data.submissions||[]).forEach(s=>existing.set(s.id,Object.assign({},existing.get(s.id)||{},s)));state.submissions=[...existing.values()];localStorage.setItem(KEY,JSON.stringify(state));renderAdmin();alert(`Synced ${data.submissions.length} submission(s).`)}catch(e){alert('Sync failed: '+e.message)}}
 async function loadDb(){
   const stored=JSON.parse(localStorage.getItem(KEY)||'null');
   if(stored){state=stored;state.teamReturnTimes=state.teamReturnTimes||{};return}

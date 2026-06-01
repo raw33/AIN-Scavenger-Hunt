@@ -1,0 +1,4 @@
+data/submissions.json
+data/uploads/
+.DS_Store
+node_modules/

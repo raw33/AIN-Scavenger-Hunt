@@ -1,0 +1,12 @@
+{
+  "name": "ain-scavenger-hunt",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AIN Scavenger Hunt 2026 web app with internal JSON/photo database.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
