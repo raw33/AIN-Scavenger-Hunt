@@ -1,0 +1,63 @@
+{
+  "game": {
+    "name": "AIN Scavenger Hunt 2026",
+    "adminPassword": "605",
+    "deadlineTime": "17:00",
+    "photoCutoffTime": "16:59",
+    "latePenalty": 1
+  },
+  "teams": [
+    {
+      "id": "team-1",
+      "name": "Team 1",
+      "code": "Team 1",
+      "members": [
+        { "name": "Cole Simon", "employer": "Dacotah Bank" },
+        { "name": "Aidan Fredrickson", "employer": "Dacotah Bank" },
+        { "name": "Ethan James", "employer": "BankNorth" },
+        { "name": "Emily Bockorny", "employer": "The 17-20 Group" }
+      ]
+    },
+    {
+      "id": "team-2",
+      "name": "Team 2",
+      "code": "Team 2",
+      "members": [
+        { "name": "Ashleigh Kirkpatrick", "employer": "Dacotah Bank" },
+        { "name": "Matthew Birkeland", "employer": "Dacotah Bank" },
+        { "name": "Ava Greenway", "employer": "CO-OP Architecture" },
+        { "name": "Jaycee Baruth", "employer": "Plains Commerce Bank" }
+      ]
+    },
+    {
+      "id": "team-3",
+      "name": "Team 3",
+      "code": "Team 3",
+      "members": [
+        { "name": "Gracen Hansen", "employer": "Dacotah Bank" },
+        { "name": "Camryn Hanson", "employer": "Dacotah Bank" },
+        { "name": "Grant Aberle", "employer": "Siegel, Barnett and Schutz" }
+      ]
+    },
+    {
+      "id": "team-4",
+      "name": "Team 4",
+      "code": "Team 4",
+      "members": [
+        { "name": "Gunnar Larson", "employer": "Dacotah Bank" },
+        { "name": "Kaitlyn Fleegel", "employer": "SBDC" },
+        { "name": "Alexandria Cutler", "employer": "RhodesAnderson Insurance" }
+      ]
+    },
+    {
+      "id": "team-5",
+      "name": "Team 5",
+      "code": "Team 5",
+      "members": [
+        { "name": "Hannah Krohn", "employer": "Dacotah Bank" },
+        { "name": "Jaden Santjer", "employer": "Dacotah Bank" },
+        { "name": "Carena Tollefson", "employer": "Agtegra" }
+      ]
+    }
+  ]
+}

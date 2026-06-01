@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIN Scavenger Hunt 2026 Admin</title>
+  <style>
+    :root{--bg:#f6f7fb;--card:#fff;--ink:#172033;--muted:#5d6678;--brand:#163b6d;--brand2:#0d9488;--line:#dfe4ee;--bad:#b42318;--good:#067647;--warn:#b54708;--shadow:0 10px 25px rgba(14,31,53,.08);--radius:14px}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}header{background:linear-gradient(135deg,var(--brand),#0f766e);color:#fff;padding:24px 18px;box-shadow:var(--shadow)}.wrap{max-width:1200px;margin:0 auto}.top{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}h1{margin:0;font-size:clamp(26px,4vw,42px);line-height:1.05}header p{margin:8px 0 0;color:#e3edf9}.link{border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:#fff;border-radius:12px;padding:10px 12px;font-weight:800;text-decoration:none}main{padding:22px 18px 48px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}.span4{grid-column:span 4}.span5{grid-column:span 5}.span6{grid-column:span 6}.span7{grid-column:span 7}.span8{grid-column:span 8}.span12{grid-column:span 12}@media(max-width:900px){.span4,.span5,.span6,.span7,.span8{grid-column:span 12}}h2{margin:0 0 10px;font-size:22px}h3{margin:0 0 10px;font-size:17px}.muted{color:var(--muted)}.small{font-size:13px}.notice{border-left:5px solid var(--brand2);background:#ecfdf5;padding:12px 14px;border-radius:12px}.danger{border-left-color:var(--bad);background:#fef3f2}.field{display:flex;flex-direction:column;gap:6px;margin:10px 0}.field label{font-size:13px;font-weight:800;color:#344054}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;background:#fff}.field textarea{min-height:80px;resize:vertical}.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:900;cursor:pointer;background:var(--brand);color:#fff}.btn.secondary{background:#eef2f7;color:#1f2937}.btn.good{background:var(--good)}.btn.bad{background:var(--bad)}.btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--line)}.mini{padding:7px 10px;border-radius:10px;font-size:12px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.space{justify-content:space-between}.badge{display:inline-flex;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900}.pending{background:#fff7ed;color:#b54708}.approved{background:#ecfdf3;color:#067647}.rejected{background:#fef3f2;color:#b42318}.unsubmitted{background:#eef2f7;color:#475467}.photo{width:100%;max-height:320px;object-fit:contain;border:1px solid var(--line);background:#f8fafc;border-radius:14px}.hunt-item{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff;margin-bottom:12px}.hidden{display:none!important}.score{font-size:38px;font-weight:950;letter-spacing:-1px}.stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}.stat{border:1px solid var(--line);border-radius:14px;background:#f8fafc;padding:12px}.stat strong{display:block;font-size:24px;line-height:1}.stat span{font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase}.person{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;font-size:14px;padding:8px 0;border-top:1px solid #e5e7eb}.person:first-of-type{border-top:0}.employer{display:block;color:var(--muted);font-size:12px}table{width:100%;border-collapse:collapse;background:#fff}th,td{padding:9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{font-size:12px;text-transform:uppercase;color:#475467;background:#f8fafc}.footer{margin-top:24px;color:#667085;text-align:center}@media(max-width:700px){.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div><h1>AIN Scavenger Hunt 2026 Admin</h1><p>Team editing, submission review, and scoring.</p></div>
+      <a class="link" href="ain-scavenger-hunt.html">Participant page</a>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+  <section id="adminLock" class="card">
+    <h2>Admin access</h2>
+    <p class="muted">Enter the admin password to edit teams and score submissions.</p>
+    <div class="field"><label>Password</label><input id="adminPass" type="password" inputmode="numeric" autocomplete="current-password" onkeydown="if(event.key==='Enter')unlockAdmin()" /></div>
+    <button class="btn" onclick="unlockAdmin()">Unlock admin</button>
+  </section>
+  <section id="adminPanel" class="hidden">
+    <div class="grid">
+      <section class="card span4">
+        <h2>Score</h2>
+        <div class="field"><label>Team to review</label><select id="teamFilter" onchange="renderAdmin()"></select></div>
+        <div class="score" id="totalScore">0</div>
+        <p class="muted" id="scoreLabel">Listed points + extra bonus - late deductions</p>
+        <div class="stat-grid" id="adminStats"></div>
+        <div class="field"><label>Return time for selected team</label><input id="returnTime" type="time" value="17:00" onchange="saveReturnTime()" /></div>
+        <div class="field"><label>Late deduction per minute</label><input id="latePenalty" type="number" min="0" value="1" onchange="saveSettings()" /></div>
+      </section>
+      <section class="card span8">
+        <div class="row space"><h2>Teams and people</h2><button class="btn secondary" onclick="addTeam()">Add team</button></div>
+        <div id="teamEditor"></div>
+      </section>
+      <section class="card span8">
+        <div class="row space"><h2>Review queue</h2><select id="statusFilter" onchange="renderAdmin()"><option value="all">All statuses</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></div>
+        <div id="adminQueue"></div>
+      </section>
+      <section class="card span4">
+        <h2>Database</h2>
+        <p class="muted">Use JSON export as the GitHub database. Replace <strong>ain-scavenger-db.json</strong> in the repo with the exported file when you want new defaults.</p>
+        <div class="row"><button class="btn" onclick="downloadDb()">Export DB JSON</button><button class="btn secondary" onclick="downloadScoreCSV()">Export scores</button></div>
+        <div class="field"><label>Import DB JSON</label><input id="importDbFile" type="file" accept="application/json,.json" /></div>
+        <button class="btn secondary" onclick="importDb()">Import database</button>
+        <div class="notice danger" style="margin-top:14px"><strong>Reset:</strong> clears local edits and submissions on this browser.</div>
+        <button class="btn bad" onclick="resetLocal()">Reset local data</button>
+      </section>
+      <section class="card span12">
+        <h2>Leaderboard</h2>
+        <div id="scoreTable"></div>
+      </section>
+    </div>
+  </section>
+  <div class="footer">Admin password: 605</div>
+</main>
+<script>
+const KEY='ainScavengerHunt2026V2';
+const DB_FILE='ain-scavenger-db.json';
+const TZ='America/Chicago';
+const HUNT=[
+  {id:1,title:'Malchow Plaza',points:5,answer:'Malchow Plaza sign',bonus:'Dakota Broadcasting shark in the window',bonusPoints:5},
+  {id:2,title:'Blooming Flowers',points:5,answer:'Inside Lily’s Boutique'},
+  {id:3,title:'Rhyme Location',points:5,answer:'Capitol Theatre / Capital Theater'},
+  {id:4,title:'Custom Apparel',points:5,answer:'Swag Shop'},
+  {id:5,title:'Big Easy Flavor',points:5,answer:'Pop’s Big Easy'},
+  {id:6,title:'Coffee Coffee Coffee',points:5,answer:'Market on the Plaza, Karisma, Red Rooster, or Cornerstone Cafe',bonus:'Coffee beverage visible',bonusPoints:5},
+  {id:7,title:'Rhyme Location',points:10,answer:'Shoe Science'},
+  {id:8,title:'Ruff! Ruff! Ruff!',points:5,answer:'Insider dog mascot Sid; alternate: real dog'},
+  {id:9,title:'Artist’s Work',points:5,answer:'Any public art piece or statue'},
+  {id:10,title:'Rhyme Location',points:5,answer:'Novel Ideas'},
+  {id:11,title:'Lunch or Dinner?',points:5,answer:'Outside 322'},
+  {id:12,title:'Rhyme Location',points:10,answer:'Revive Day Spa'},
+  {id:13,title:'What Time Is It?',points:10,answer:'Verdin Street Clock'},
+  {id:14,title:'Rhyme Location',points:10,answer:'Dacotah Bank'},
+  {id:15,title:'Cornerstone Cafe',points:5,answer:'Outside Cornerstone Cafe'},
+  {id:16,title:'Rhyme Location',points:10,answer:'Sweat Zone'},
+  {id:17,title:'Sears Boutique?',points:5,answer:'Sears Lofts / Livie Ann Boutique'},
+  {id:18,title:'Rhyme Location',points:10,answer:'Dakota Prairie Museum',bonus:'Original building use/name',bonusPoints:5},
+  {id:19,title:'Finale',points:20,answer:'Alonzo Ward Hotel, Finery Event Space, Roma’s, Costa Bravo',bonus:'Telephone booth selfie',bonusPoints:5}
+];
+const FALLBACK_DB={"game":{"name":"AIN Scavenger Hunt 2026","adminPassword":"605","deadlineTime":"17:00","photoCutoffTime":"16:59","latePenalty":1},"teams":[{"id":"team-1","name":"Team 1","code":"Team 1","members":[{"name":"Cole Simon","employer":"Dacotah Bank"},{"name":"Aidan Fredrickson","employer":"Dacotah Bank"},{"name":"Ethan James","employer":"BankNorth"},{"name":"Emily Bockorny","employer":"The 17-20 Group"}]},{"id":"team-2","name":"Team 2","code":"Team 2","members":[{"name":"Ashleigh Kirkpatrick","employer":"Dacotah Bank"},{"name":"Matthew Birkeland","employer":"Dacotah Bank"},{"name":"Ava Greenway","employer":"CO-OP Architecture"},{"name":"Jaycee Baruth","employer":"Plains Commerce Bank"}]},{"id":"team-3","name":"Team 3","code":"Team 3","members":[{"name":"Gracen Hansen","employer":"Dacotah Bank"},{"name":"Camryn Hanson","employer":"Dacotah Bank"},{"name":"Grant Aberle","employer":"Siegel, Barnett and Schutz"}]},{"id":"team-4","name":"Team 4","code":"Team 4","members":[{"name":"Gunnar Larson","employer":"Dacotah Bank"},{"name":"Kaitlyn Fleegel","employer":"SBDC"},{"name":"Alexandria Cutler","employer":"RhodesAnderson Insurance"}]},{"id":"team-5","name":"Team 5","code":"Team 5","members":[{"name":"Hannah Krohn","employer":"Dacotah Bank"},{"name":"Jaden Santjer","employer":"Dacotah Bank"},{"name":"Carena Tollefson","employer":"Agtegra"}]}]};
+let state={db:FALLBACK_DB,activeTeamId:'team-1',submissions:[],teamReturnTimes:{}};
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function slug(s){return String(s||'team').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+Math.random().toString(36).slice(2,6)}
+function save(){localStorage.setItem(KEY,JSON.stringify(state));renderAdmin()}
+function item(id){return HUNT.find(x=>x.id==id)}
+function teamById(id){return state.db.teams.find(t=>t.id===id)}
+function selectedTeamId(){return $('teamFilter')?.value||'all'}
+function submissionsForTeam(id){return id==='all'?state.submissions:state.submissions.filter(s=>s.teamId===id)}
+function formatCentral(iso){if(!iso)return '';return new Intl.DateTimeFormat('en-US',{timeZone:TZ,dateStyle:'short',timeStyle:'short'}).format(new Date(iso))+' CST/CDT'}
+async function loadDb(){
+  const stored=JSON.parse(localStorage.getItem(KEY)||'null');
+  if(stored){state=stored;state.teamReturnTimes=state.teamReturnTimes||{};return}
+  try{const res=await fetch(DB_FILE,{cache:'no-store'});if(res.ok)state.db=await res.json()}catch(e){}
+  state.activeTeamId=state.db.teams[0]?.id||'';
+  state.db.teams.forEach(t=>state.teamReturnTimes[t.id]=state.db.game.deadlineTime||'17:00');
+  localStorage.setItem(KEY,JSON.stringify(state));
+}
+function unlockAdmin(){if(($('adminPass').value||'').trim()===(state.db.game.adminPassword||'605')){$('adminLock').classList.add('hidden');$('adminPanel').classList.remove('hidden');renderAdmin()}else alert('Incorrect password.')}
+function calc(teamId='all'){
+  if(teamId==='all')return state.db.teams.reduce((a,t)=>{const c=calc(t.id);a.base+=c.base;a.bonus+=c.bonus;a.extra+=c.extra;a.late+=c.late;a.total+=c.total;return a},{base:0,bonus:0,extra:0,late:0,total:0});
+  let base=0,bonus=0;
+  HUNT.forEach(h=>{const approved=submissionsForTeam(teamId).filter(s=>s.itemId===h.id&&s.status==='approved');base+=Math.min(h.points,approved.reduce((a,s)=>a+(Number(s.awardedBase)||0),0));bonus+=Math.min(h.bonusPoints||0,approved.reduce((a,s)=>a+(Number(s.awardedBonus)||0),0))});
+  const extra=submissionsForTeam(teamId).filter(s=>s.status==='approved').reduce((a,s)=>a+(Number(s.extraPersonBonus)||0),0);
+  const late=lateDeduction(teamId);
+  return {base,bonus,extra,late,total:Math.max(0,base+bonus+extra-late)};
+}
+function lateDeduction(teamId){const rt=state.teamReturnTimes[teamId]||state.db.game.deadlineTime||'17:00';const dl=state.db.game.deadlineTime||'17:00';const [rh,rm]=rt.split(':').map(Number);const [dh,dm]=dl.split(':').map(Number);return Math.max(0,(rh*60+rm)-(dh*60+dm))*(Number(state.db.game.latePenalty)||0)}
+function renderTeamFilter(){const sel=$('teamFilter');const current=sel.value||'all';sel.innerHTML='<option value="all">All teams</option>'+state.db.teams.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');sel.value=state.db.teams.some(t=>t.id===current)?current:'all'}
+function renderTeamEditor(){$('teamEditor').innerHTML=state.db.teams.map(t=>`<div class="hunt-item"><div class="row space"><h3>${esc(t.name)} <span class="badge unsubmitted">${t.members.length}</span></h3><button class="btn bad mini" onclick="deleteTeam('${t.id}')">Delete team</button></div><div class="row"><div class="field" style="flex:1"><label>Team name</label><input value="${esc(t.name)}" onchange="renameTeam('${t.id}',this.value)"></div><div class="field" style="flex:1"><label>Participant dropdown label/code</label><input value="${esc(t.code||t.name)}" onchange="setTeamCode('${t.id}',this.value)"></div></div>${t.members.map((p,i)=>`<div class="person"><div><strong>${esc(p.name)}</strong><span class="employer">${esc(p.employer)}</span></div><button class="btn bad mini" onclick="deleteMember('${t.id}',${i})">Remove</button></div>`).join('')}<div class="row"><input id="name_${t.id}" placeholder="Name" style="flex:1;border:1px solid var(--line);border-radius:12px;padding:10px"><input id="employer_${t.id}" placeholder="Employer" style="flex:1;border:1px solid var(--line);border-radius:12px;padding:10px"><button class="btn secondary" onclick="addMember('${t.id}')">Add member</button></div></div>`).join('')}
+function addTeam(){const n=state.db.teams.length+1;const id=slug('team-'+n);state.db.teams.push({id,name:`Team ${n}`,code:`Team ${n}`,members:[]});state.teamReturnTimes[id]=state.db.game.deadlineTime||'17:00';save()}
+function deleteTeam(id){if(!confirm('Delete this team and its submissions?'))return;state.db.teams=state.db.teams.filter(t=>t.id!==id);state.submissions=state.submissions.filter(s=>s.teamId!==id);delete state.teamReturnTimes[id];save()}
+function renameTeam(id,value){const t=teamById(id);if(!t)return;t.name=value.trim()||t.name;state.submissions.filter(s=>s.teamId===id).forEach(s=>s.teamName=t.name);save()}
+function setTeamCode(id,value){const t=teamById(id);if(!t)return;t.code=value.trim()||t.name;save()}
+function addMember(id){const name=$('name_'+id).value.trim();const employer=$('employer_'+id).value.trim();if(!name)return;teamById(id).members.push({name,employer});save()}
+function deleteMember(id,index){teamById(id).members.splice(index,1);save()}
+function statusBadge(s){return `<span class="badge ${s}">${esc(s)}</span>`}
+async function review(id,status){const s=state.submissions.find(x=>x.id===id);if(!s)return;const h=item(s.itemId);s.status=status;if(status==='approved'){s.awardedBase=h.points;s.awardedBonus=Number($('bonus_'+id)?.value||0);s.extraPersonBonus=Number($('extra_'+id)?.value||0)}else{s.awardedBase=0;s.awardedBonus=0;s.extraPersonBonus=0}s.adminNote=$('note_'+id)?.value||'';save()}
+function renderQueue(){const filter=$('statusFilter').value;const tid=selectedTeamId();let subs=submissionsForTeam(tid).sort((a,b)=>(a.teamName||'').localeCompare(b.teamName||'',undefined,{numeric:true})||a.itemId-b.itemId);if(filter!=='all')subs=subs.filter(s=>s.status===filter);$('adminQueue').innerHTML=subs.length?subs.map(s=>{const h=item(s.itemId);return `<div class="hunt-item"><div class="row space"><h3>${esc(s.teamName)} · ${h.id}. ${esc(h.title)} ${statusBadge(s.status)}</h3></div><div class="grid"><div class="span6"><img src="${s.photo}" class="photo" alt="Submission"></div><div class="span6"><p><strong>Expected:</strong> ${esc(h.answer)}</p><p><strong>Points:</strong> ${h.points}${h.bonus?` | Listed bonus: ${h.bonusPoints} (${esc(h.bonus)})`:''}</p><p class="small muted">Submitted ${formatCentral(s.submittedAt)} · Extra people pictured: ${Number(s.extraPeople)||0}</p><p><strong>Participant note:</strong> ${esc(s.note||'None')}</p><div class="field"><label>Listed bonus points awarded</label><input id="bonus_${s.id}" type="number" min="0" max="${h.bonusPoints||0}" value="${s.awardedBonus||0}"></div><div class="field"><label>Extra-person bonus points</label><input id="extra_${s.id}" type="number" min="0" value="${s.extraPersonBonus||0}"></div><div class="field"><label>Admin note</label><textarea id="note_${s.id}">${esc(s.adminNote||'')}</textarea></div><div class="row"><button class="btn good" onclick="review('${s.id}','approved')">Approve + award points</button><button class="btn bad" onclick="review('${s.id}','rejected')">Reject</button><button class="btn secondary" onclick="review('${s.id}','pending')">Pending</button></div></div></div></div>`}).join(''):'<p class="muted">No submissions in this filter.</p>'}
+function renderScores(){const tid=selectedTeamId();const c=calc(tid);$('totalScore').textContent=c.total;$('scoreLabel').textContent=tid==='all'?'All teams combined':`${teamById(tid)?.name}: listed ${c.base+c.bonus}/160 + extra ${c.extra} - late ${c.late}`;$('adminStats').innerHTML=`<div class="stat"><strong>${c.base}</strong><span>Base</span></div><div class="stat"><strong>${c.bonus}</strong><span>Listed bonus</span></div><div class="stat"><strong>${c.extra}</strong><span>Extra people</span></div><div class="stat"><strong>-${c.late}</strong><span>Late</span></div>`;$('returnTime').disabled=tid==='all';$('returnTime').value=tid==='all'?(state.db.game.deadlineTime||'17:00'):(state.teamReturnTimes[tid]||state.db.game.deadlineTime||'17:00');$('latePenalty').value=state.db.game.latePenalty||1;const rows=state.db.teams.map(t=>{const tc=calc(t.id);const subs=submissionsForTeam(t.id);return `<tr><td>${esc(t.name)}</td><td>${t.members.length}</td><td>${subs.length}</td><td>${subs.filter(s=>s.status==='pending').length}</td><td>${tc.base+tc.bonus}</td><td>${tc.extra}</td><td>-${tc.late}</td><td><strong>${tc.total}</strong></td></tr>`}).join('');$('scoreTable').innerHTML=`<table><thead><tr><th>Team</th><th>People</th><th>Submissions</th><th>Pending</th><th>Listed</th><th>Extra</th><th>Late</th><th>Total</th></tr></thead><tbody>${rows}</tbody></table>`}
+function saveReturnTime(){const tid=selectedTeamId();if(tid!=='all')state.teamReturnTimes[tid]=$('returnTime').value;save()}
+function saveSettings(){state.db.game.latePenalty=Number($('latePenalty').value||1);localStorage.setItem(KEY,JSON.stringify(state));renderAdmin()}
+function download(filename,text,type='application/json'){const blob=new Blob([text],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();URL.revokeObjectURL(a.href)}
+function downloadDb(){download('ain-scavenger-db.json',JSON.stringify(state.db,null,2))}
+function csvEscape(v){return '"'+String(v??'').replaceAll('"','""')+'"'}
+function downloadScoreCSV(){const rows=[['team','item','status','base','listedBonus','extraPersonBonus','submittedAt','participantNote','adminNote']];state.submissions.forEach(s=>rows.push([s.teamName,s.itemId,s.status,s.awardedBase||0,s.awardedBonus||0,s.extraPersonBonus||0,formatCentral(s.submittedAt),s.note,s.adminNote]));download('ain-scavenger-score-summary.csv',rows.map(r=>r.map(csvEscape).join(',')).join('\n'),'text/csv')}
+function importDb(){const f=$('importDbFile').files[0];if(!f){alert('Choose a JSON file.');return}const r=new FileReader();r.onload=e=>{try{state.db=JSON.parse(e.target.result);state.db.teams.forEach(t=>{if(!state.teamReturnTimes[t.id])state.teamReturnTimes[t.id]=state.db.game.deadlineTime||'17:00'});save();alert('Database imported.')}catch(err){alert('Could not import database: '+err.message)}};r.readAsText(f)}
+function resetLocal(){if(confirm('Clear local teams, submissions, and scoring from this browser?')){localStorage.removeItem(KEY);location.reload()}}
+function renderAdmin(){if($('adminPanel').classList.contains('hidden'))return;renderTeamFilter();renderTeamEditor();renderQueue();renderScores()}
+loadDb();
+</script>
+</body>
+</html>
