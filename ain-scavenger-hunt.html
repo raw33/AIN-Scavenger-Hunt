@@ -60,9 +60,11 @@
   </div>
   <div class="footer">Participant page. Team setup and scoring live in the admin page.</div>
 </main>
+<script src="backend-config.js"></script>
 <script>
 const KEY='ainScavengerHunt2026V2';
 const DB_FILE='ain-scavenger-db.json';
+const BACKEND_URL=(window.AIN_BACKEND_URL||'').trim();
 const TZ='America/Chicago';
 const HUNT=[
   {id:1,title:'Malchow Plaza',points:5,hint:'Take a selfie with the sign that says "Malchow’s Plaza."',answer:'Malchow Plaza sign',bonus:'Dakota Broadcasting shark in the window',bonusPoints:5},
@@ -90,10 +92,15 @@ let state={db:FALLBACK_DB,activeTeamId:'team-1',submissions:[]};
 function $(id){return document.getElementById(id)}
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));renderAll()}
+function backendUrl(){return BACKEND_URL}
+function hasBackend(){return Boolean(backendUrl())}
 function item(id){return HUNT.find(x=>x.id==id)}
 function activeTeam(){return state.db.teams.find(t=>t.id===state.activeTeamId)||state.db.teams[0]}
 function submissionsForTeam(id){return state.submissions.filter(s=>s.teamId===id)}
 function formatCentral(iso){if(!iso)return '';return new Intl.DateTimeFormat('en-US',{timeZone:TZ,dateStyle:'short',timeStyle:'short'}).format(new Date(iso))+' CST/CDT'}
+async function postBackend(payload){if(!hasBackend())return false;await fetch(backendUrl(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});return true}
+function jsonp(url){return new Promise((resolve,reject)=>{const cb='ain_cb_'+Math.random().toString(36).slice(2);const script=document.createElement('script');window[cb]=data=>{delete window[cb];script.remove();resolve(data)};script.onerror=()=>{delete window[cb];script.remove();reject(new Error('Could not reach database.'))};const u=new URL(url);u.searchParams.set('callback',cb);script.src=u.toString();document.body.appendChild(script)})}
+async function syncTeamSubmissions(){if(!hasBackend())return;try{const u=new URL(backendUrl());u.searchParams.set('action','list');const data=await jsonp(u.toString());if(!data.ok)return;const remote=(data.submissions||[]).filter(s=>s.teamId===state.activeTeamId);state.submissions=[...state.submissions.filter(s=>s.teamId!==state.activeTeamId),...remote];localStorage.setItem(KEY,JSON.stringify(state));renderAll()}catch(e){console.warn(e)}}
 async function loadDb(){
   const stored=JSON.parse(localStorage.getItem(KEY)||'null');
   if(stored){state=stored;return}
@@ -101,23 +108,23 @@ async function loadDb(){
   state.activeTeamId=state.db.teams[0]?.id||'';
   save();
 }
-function selectTeam(id){state.activeTeamId=id;save()}
+function selectTeam(id){state.activeTeamId=id;save();syncTeamSubmissions()}
 function checkAdminCode(){if(($('adminCode').value||'').trim()===(state.db.game.adminPassword||'605'))location.href='ain-scavenger-admin.html';else alert('That code is not the admin code. Participants can choose their team below.')}
 function renderTeamSelect(){const sel=$('activeTeamSelect');sel.innerHTML=state.db.teams.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');sel.value=state.activeTeamId}
 function renderRoster(){const team=activeTeam();$('teamRoster').innerHTML=team?`<h3>${esc(team.name)}</h3>${team.members.map(p=>`<div class="person"><strong>${esc(p.name)}</strong><span class="employer">${esc(p.employer)}</span></div>`).join('')}`:'<p class="muted">No team selected.</p>'}
-function renderStats(){const people=state.db.teams.reduce((a,t)=>a+t.members.length,0);const mine=submissionsForTeam(state.activeTeamId);$('eventStats').innerHTML=`<div class="stat"><strong>${state.db.teams.length}</strong><span>Teams</span></div><div class="stat"><strong>${people}</strong><span>People</span></div><div class="stat"><strong>${mine.length}</strong><span>My submissions</span></div><div class="stat"><strong>160</strong><span>Listed points</span></div>`}
+function renderStats(){const people=state.db.teams.reduce((a,t)=>a+t.members.length,0);const mine=submissionsForTeam(state.activeTeamId);$('eventStats').innerHTML=`<div class="stat"><strong>${state.db.teams.length}</strong><span>Teams</span></div><div class="stat"><strong>${people}</strong><span>People</span></div><div class="stat"><strong>${mine.length}</strong><span>My submissions</span></div><div class="stat"><strong>${hasBackend()?'Online':'Local'}</strong><span>Database</span></div>`}
 function renderHuntList(){const q=($('hintSearch').value||'').toLowerCase();const rows=HUNT.filter(h=>!q||[h.title,h.hint,h.answer].join(' ').toLowerCase().includes(q));$('huntList').innerHTML=rows.map(h=>`<div class="hunt-item"><h3><span class="num">${h.id}</span>${esc(h.title)} <span class="badge unsubmitted">${h.points} pts</span></h3><p>${esc(h.hint)}</p>${h.bonus?`<p class="small muted"><strong>Bonus available:</strong> ${esc(h.bonus)} (${h.bonusPoints} pts)</p>`:''}</div>`).join('')}
 function renderItemSelect(){$('submissionItem').innerHTML=HUNT.map(h=>`<option value="${h.id}">${h.id}. ${esc(h.title)} (${h.points} pts)</option>`).join('')}
 $('photoInput').addEventListener('change',()=>{const f=$('photoInput').files[0];if(!f)return;const r=new FileReader();r.onload=e=>{$('photoPreview').src=e.target.result;$('photoPreviewBox').classList.remove('hidden')};r.readAsDataURL(f)});
 function compressImage(file,max=1400,quality=.72){return new Promise((res,rej)=>{const img=new Image();const r=new FileReader();r.onload=e=>{img.onload=()=>{let {width,height}=img;const scale=Math.min(1,max/Math.max(width,height));width=Math.round(width*scale);height=Math.round(height*scale);const c=document.createElement('canvas');c.width=width;c.height=height;c.getContext('2d').drawImage(img,0,0,width,height);res(c.toDataURL('image/jpeg',quality))};img.onerror=rej;img.src=e.target.result};r.onerror=rej;r.readAsDataURL(file)})}
-async function submitPhoto(){const team=activeTeam();const f=$('photoInput').files[0];if(!team){alert('Choose a team first.');return}if(!f){alert('Choose a photo first.');return}$('submitStatus').textContent='Preparing photo...';const iso=new Date().toISOString();const sub={id:crypto.randomUUID(),teamId:team.id,teamName:team.name,itemId:Number($('submissionItem').value),photo:await compressImage(f),extraPeople:Number($('extraPeople').value||0),note:$('participantNote').value.trim(),submittedAt:iso,status:'pending',adminNote:'',awardedBase:0,awardedBonus:0,extraPersonBonus:0};state.submissions.push(sub);save();$('submitStatus').textContent='Saved for admin review.';clearSubmissionForm()}
+async function submitPhoto(){const team=activeTeam();const f=$('photoInput').files[0];if(!team){alert('Choose a team first.');return}if(!f){alert('Choose a photo first.');return}$('submitStatus').textContent='Preparing photo...';const iso=new Date().toISOString();const sub={id:crypto.randomUUID(),teamId:team.id,teamName:team.name,itemId:Number($('submissionItem').value),photo:await compressImage(f),extraPeople:Number($('extraPeople').value||0),note:$('participantNote').value.trim(),submittedAt:iso,status:'pending',adminNote:'',awardedBase:0,awardedBonus:0,extraPersonBonus:0};state.submissions.push(sub);save();try{if(await postBackend({type:'submission',submission:sub})){$('submitStatus').textContent='Submitted to the shared database for admin review.'}else{$('submitStatus').textContent='Saved on this device. Shared database is not configured yet.'}}catch(e){$('submitStatus').textContent='Saved on this device, but the shared database did not receive it. Try again or export the team package.'}clearSubmissionForm()}
 function clearSubmissionForm(){$('photoInput').value='';$('extraPeople').value=0;$('participantNote').value='';$('photoPreviewBox').classList.add('hidden')}
 function download(filename,text,type='application/json'){const blob=new Blob([text],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();URL.revokeObjectURL(a.href)}
 function downloadTeamPackage(){const team=activeTeam();if(!team){alert('Choose a team first.');return}const payload={type:'ain-scavenger-submissions',exportedAt:new Date().toISOString(),team,submissions:submissionsForTeam(team.id)};download(`ain-submissions-${team.name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()}.json`,JSON.stringify(payload,null,2))}
 function statusBadge(s){return `<span class="badge ${s}">${esc(s)}</span>`}
 function renderSubmissions(){const mine=submissionsForTeam(state.activeTeamId).sort((a,b)=>a.itemId-b.itemId);$('pendingCount').textContent=`${mine.filter(s=>s.status==='pending').length} pending`;$('submitBar').style.width=(Math.min(100,(new Set(mine.map(s=>s.itemId)).size/HUNT.length*100))).toFixed(0)+'%';$('submissionList').innerHTML=mine.length?mine.map(s=>{const h=item(s.itemId);return `<div class="hunt-item"><div class="row space"><h3>${h.id}. ${esc(h.title)}</h3>${statusBadge(s.status)}</div><img src="${s.photo}" class="photo" alt="Submission"><p class="small muted">Submitted: ${formatCentral(s.submittedAt)} | Extra people: ${s.extraPeople||0}</p>${s.note?`<p>${esc(s.note)}</p>`:''}</div>`}).join(''):'<p class="muted">No photos submitted yet for this team.</p>'}
 function renderAll(){renderTeamSelect();renderRoster();renderStats();renderItemSelect();renderHuntList();renderSubmissions()}
-loadDb().then(renderAll);
+loadDb().then(()=>{renderAll();syncTeamSubmissions()});
 </script>
 </body>
 </html>
