@@ -2,7 +2,7 @@
 
 Web app for the Aberdeen Internship Network scavenger hunt.
 
-This repo now includes its own backend. Participants can submit photos, the server saves them under the correct team, and admins can approve finds with a checkbox so points calculate automatically.
+This repo includes its own backend. Participants can submit photos, the server saves them under the correct team, and admins can approve finds with a checkbox so points calculate automatically.
 
 ## Files
 
@@ -12,8 +12,9 @@ This repo now includes its own backend. Participants can submit photos, the serv
 - `ain-scavenger-db.json` - default game/team database.
 - `backend-config.js` - optional backend URL override.
 - `server.js` - internal Node backend and static file server.
-- `data/submissions.json` - runtime database, created automatically and ignored by git.
-- `data/uploads/` - uploaded photos, created automatically and ignored by git.
+- Replit PostgreSQL - production database when `DATABASE_URL` is present.
+- `data/submissions.json` - local fallback database, created automatically and ignored by git.
+- `data/uploads/` - local fallback photo storage, created automatically and ignored by git.
 
 ## Run Locally
 
@@ -45,9 +46,30 @@ Admin code:
 
 Listed bonus and extra-person bonus points can be entered beside the checkbox.
 
+## Replit Database Setup
+
+Use Replit's built-in Database tool and production database.
+
+1. Import this GitHub repo into Replit.
+2. Open the Replit **Database** tool.
+3. Add/enable the SQL database.
+4. Confirm Replit provides `DATABASE_URL`.
+5. Publish/deploy the app and choose/create the **production database**.
+6. Run the app with:
+
+```bash
+npm start
+```
+
+When `DATABASE_URL` exists, `server.js` automatically creates the `submissions` table and stores photo data plus scoring records in PostgreSQL. No GitHub token is exposed to the browser.
+
+Replit has separate development and production databases. Use the production database for the actual scavenger hunt so test data does not mix with live submissions.
+
 ## Deployment
 
-GitHub Pages alone cannot save uploaded files or write to a database. Deploy this as a Node app using a host that supports persistent storage, such as:
+GitHub Pages alone cannot save uploaded files or write to a database. Deploy this as a Node app. Replit is the intended host for this version.
+
+Other compatible hosts:
 
 - Render with a persistent disk
 - Railway with a volume
